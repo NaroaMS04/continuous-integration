@@ -3,30 +3,26 @@ name: Continuous integration example (Parametrizado)
 on: 
   pull_request:
     branches: [ main ]
-    
+
 jobs:
-  test:
-    # 1. Definimos la matriz de parámetros
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        java-version: ['17', '21']
-      # Opcional: fail-fast en false permite que si falla uno, los demás sigan
-      fail-fast: false
-
-    # 2. Usamos el parámetro del runner
+  build:
     runs-on: ${{ matrix.os }}
-
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ macos-latest, windows-latest, ubuntu-latest ]
+        java: [ '11', '17', '21' ]
+    
+    name: Java ${{ matrix.java }} on ${{ matrix.os }}
+    
     steps:
-      - uses: actions/checkout@v4 # Nota: La versión estable actual es v4
+      - uses: actions/checkout@v4
 
-      - name: Set up JDK ${{ matrix.java-version }}
+      - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          # 3. Usamos el parámetro de la versión de Java
-          java-version: ${{ matrix.java-version }}
-          cache: 'maven'
+          distribution: 'temurin' # 'adopt' está marcado como legacy, 'temurin' es el estándar actual
+          java-version: ${{ matrix.java }}
 
       - name: Run tests
         run: mvn test
